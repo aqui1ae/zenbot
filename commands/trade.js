@@ -309,6 +309,11 @@ module.exports = function container (get, set, clear) {
           so.order_type = 'maker'
         }
 
+        var order_types = ['maker', 'taker']
+        if (!so.order_type in order_types) {
+          so.order_type = 'maker'
+        }
+
         var db_cursor, trade_cursor
         var query_start = tb().resize(so.period).subtract(so.min_periods * 2).toMilliseconds()
         var days = Math.ceil((new Date().getTime() - query_start) / 86400000)
