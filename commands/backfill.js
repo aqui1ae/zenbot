@@ -1,12 +1,12 @@
 var tb = require('timebucket')
   , n = require('numbro')
   , parallel = require('run-parallel')
-  , crypto = require('crypto')
 
 module.exports = function container (get, set, clear) {
   var c = get('conf') || {}
 
   var collectionService = get('lib.collection-service')(get, set, clear)
+  var markerService = get('lib.marker-service')(get, set, clear)
 
   return function (program) {
     program
@@ -21,57 +21,26 @@ module.exports = function container (get, set, clear) {
           process.exit(1)
         }
 
+        markerService.init(exchange.historyScan, selector, cmd.days)
+
         var trades = collectionService.getTrades();
         var resume_markers = collectionService.getResumeMarkers();
 
-        var marker = {
-          id: crypto.randomBytes(4).toString('hex'),
-          selector: selector.normalized,
-          from: null,
-          to: null,
-          oldest_time: null,
-          newest_time: null
-        }
         var trade_counter = 0
         var day_trade_counter = 0
         var days_left = cmd.days + 1
-        var target_time, start_time
         var mode = exchange.historyScan
         var last_batch_id, last_batch_opts
         if (!mode) {
           console.error('cannot backfill ' + selector.normalized + ': exchange does not offer historical data')
           process.exit(0)
         }
-        if (mode === 'backward') {
-          target_time = new Date().getTime() - (86400000 * cmd.days)
-        }
-        else {
-          target_time = new Date().getTime()
-          start_time = new Date().getTime() - (86400000 * cmd.days)
-        }
-        resume_markers.select({query: {selector: selector.normalized}}, function (err, markers) {
-          if (err) throw err
-          markers.sort(function (a, b) {
-            if (mode === 'backward') {
-              if (a.to > b.to) return -1
-              if (a.to < b.to) return 1
-            }
-            else {
-              if (a.from < b.from) return -1
-              if (a.from > b.from) return 1
-            }
-            return 0
-          })
+
+        markerService.getPreviousMarkers().then((markers) => {
           getNext()
           function getNext () {
-            var opts = {product_id: selector.product_id}
-            if (mode === 'backward') {
-              opts.to = marker.from
-            }
-            else {
-              if (marker.to) opts.from = marker.to + 1
-              else opts.from = exchange.getCursor(start_time)
-            }
+            var marker = markerService.getMarker()
+            var opts = markerService.getExchangeTradeQueryOpts(exchange)
             last_batch_opts = opts
             exchange.getTrades(opts, function (err, trades) {
               if (err) {
@@ -124,25 +93,21 @@ module.exports = function container (get, set, clear) {
               })
               function runTasks () {
                 parallel(tasks, function (err) {
+                  marker = markerService.getMarker()
+                  
                   if (err) {
                     console.error(err)
                     console.error('retrying...')
                     return setTimeout(runTasks, 10000)
                   }
+                  
                   var oldest_time = marker.oldest_time
                   var newest_time = marker.newest_time
+                  
                   markers.forEach(function (other_marker) {
-                    // for backward scan, if the oldest_time is within another marker's range, skip to the other marker's start point.
-                    // for forward scan, if the newest_time is within another marker's range, skip to the other marker's end point.
-                    if (mode === 'backward' && marker.id !== other_marker.id && marker.from <= other_marker.to && marker.from > other_marker.from) {
-                      marker.from = other_marker.from
-                      marker.oldest_time = other_marker.oldest_time
-                    }
-                    else if (mode !== 'backward' && marker.id !== other_marker.id && marker.to >= other_marker.from && marker.to < other_marker.to) {
-                      marker.to = other_marker.to
-                      marker.newest_time = other_marker.newest_time
-                    }
+                    markerService.updateMarkerBasedOnAnotherMarker(other_marker)
                   })
+
                   if (oldest_time !== marker.oldest_time) {
                     var diff = tb(oldest_time - marker.oldest_time).resize('1h').value
                     console.log('\nskipping ' + diff + ' hrs of previously collected data')
@@ -153,6 +118,10 @@ module.exports = function container (get, set, clear) {
                   }
                   resume_markers.save(marker, function (err) {
                     if (err) throw err
+
+                    var target_time = markerService.getTargetTime()
+                    var marker = markerService.getMarker()
+
                     trade_counter += trades.length
                     day_trade_counter += trades.length
                     var current_days_left = 1 + (mode === 'backward' ? tb(marker.oldest_time - target_time).resize('1d').value : tb(target_time - marker.newest_time).resize('1d').value)
@@ -164,6 +133,7 @@ module.exports = function container (get, set, clear) {
                     else {
                       process.stdout.write('.')
                     }
+
                     if (mode === 'backward' && marker.oldest_time <= target_time) {
                       console.log('\ndownload complete!\n')
                       process.exit(0)
@@ -180,30 +150,16 @@ module.exports = function container (get, set, clear) {
               runTasks()
             })
           }
+          
           function saveTrade (trade, cb) {
+            markerService.updateMarkerBasedOnTrade(exchange.getCursor(trade), trade)
+            
             trade.id = selector.normalized + '-' + String(trade.trade_id)
             trade.selector = selector.normalized
-            var cursor = exchange.getCursor(trade)
-            if (mode === 'backward') {
-              if (!marker.to) {
-                marker.to = cursor
-                marker.oldest_time = trade.time
-                marker.newest_time = trade.time
-              }
-              marker.from = marker.from ? Math.min(marker.from, cursor) : cursor
-              marker.oldest_time = Math.min(marker.oldest_time, trade.time)
-            }
-            else {
-              if (!marker.from) {
-                marker.from = cursor
-                marker.oldest_time = trade.time
-                marker.newest_time = trade.time
-              }
-              marker.to = marker.to ? Math.max(marker.to, cursor) : cursor
-              marker.newest_time = Math.max(marker.newest_time, trade.time)
-            }
+
             trades.save(trade, cb)
           }
+
         })
       })
   }
