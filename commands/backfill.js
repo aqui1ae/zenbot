@@ -24,7 +24,6 @@ module.exports = function container (get, set, clear) {
         markerService.init(exchange.historyScan, selector, cmd.days)
 
         var trades = collectionService.getTrades();
-        var resume_markers = collectionService.getResumeMarkers();
 
         var trade_counter = 0
         var day_trade_counter = 0
@@ -101,22 +100,30 @@ module.exports = function container (get, set, clear) {
                     return setTimeout(runTasks, 10000)
                   }
                   
-                  var oldest_time = marker.oldest_time
-                  var newest_time = marker.newest_time
+                  // var oldest_time = marker.oldest_time 
+                  // var newest_time = marker.newest_time 
                   
                   markers.forEach(function (other_marker) {
                     markerService.updateMarkerBasedOnAnotherMarker(other_marker)
                   })
 
-                  if (oldest_time !== marker.oldest_time) {
-                    var diff = tb(oldest_time - marker.oldest_time).resize('1h').value
-                    console.log('\nskipping ' + diff + ' hrs of previously collected data')
+                  var hrs = markerService.getNumberOfHoursOfPreviouslyCollectedDataSkipped(marker);
+                  if (hrs) {
+                    console.log('\nskipping ' + hrs + ' hrs of previously collected data')
                   }
-                  else if (newest_time !== marker.newest_time) {
-                    var diff = tb(marker.newest_time - newest_time).resize('1h').value
-                    console.log('\nskipping ' + diff + ' hrs of previously collected data')
-                  }
-                  resume_markers.save(marker, function (err) {
+
+                  // marker = markerService.getMarker()
+
+                  // if (oldest_time !== marker.oldest_time) {
+                  //   var diff = tb(oldest_time - marker.oldest_time).resize('1h').value
+                  //   console.log('\nskipping ' + diff + ' hrs of previously collected data')
+                  // }
+                  // else if (newest_time !== marker.newest_time) {
+                  //   var diff = tb(marker.newest_time - newest_time).resize('1h').value
+                  //   console.log('\nskipping ' + diff + ' hrs of previously collected data')
+                  // }
+
+                  markerService.saveNewMarker(marker).then((err) => {
                     if (err) throw err
 
                     var target_time = markerService.getTargetTime()
@@ -124,7 +131,8 @@ module.exports = function container (get, set, clear) {
 
                     trade_counter += trades.length
                     day_trade_counter += trades.length
-                    var current_days_left = 1 + (mode === 'backward' ? tb(marker.oldest_time - target_time).resize('1d').value : tb(target_time - marker.newest_time).resize('1d').value)
+                    var current_days_left = markerService.getCurrentDaysLeft()
+                    
                     if (current_days_left >= 0 && current_days_left != days_left) {
                       console.log('\n' + selector.normalized, 'saved', day_trade_counter, 'trades', current_days_left, 'days left')
                       day_trade_counter = 0
@@ -134,10 +142,11 @@ module.exports = function container (get, set, clear) {
                       process.stdout.write('.')
                     }
 
-                    if (mode === 'backward' && marker.oldest_time <= target_time) {
+                    if (markerService.isDownloadComplete()) {
                       console.log('\ndownload complete!\n')
                       process.exit(0)
                     }
+
                     if (exchange.backfillRateLimit) {
                       setTimeout(getNext, exchange.backfillRateLimit)
                     } else {
