@@ -7,45 +7,58 @@ module.exports = function container (get, set, clear) {
 	  	resumeMarkerService = get('lib.resume-marker-service')(get, set, clear)
 
 		moreToProcess = true;
-		processing = false;
+		// processing = false;
+		prm = undefined
 
-		while (moreToProcess) {
-			debugger
-			if (!processing) {
-				processing = true
-				debugger
-				tradesService.getTrades( resumeMarkerService.getMarkerBoundaryTrade() ).then((trades) => {
+		debugger
+		//while (moreToProcess) {
+			// if (!processing) {
+				// processing = true
+				
+				if (prm === undefined) {
 					debugger
-					console.log("in backfillFunction callback")
-					var moreTrades;
-					var index = -1;
+					tradesService.getTrades( resumeMarkerService.getMarkerBoundaryTrade() ).then(function (trades) {
+						debugger
+						console.log("in backfillFunction callback")
+						var moreTrades;
+						var index = -1;
 
-					do {
-						moreTrades = trades && (index + 1) < trades.length;
+						// WILO: Need to design some fake DB trade data to test with
+						//  probably a server which serves trades that fit a certain scenario
+						//  For now, just a bunch of trades will do. But later, trades 
+						//  to test that the bot makes the expected decision.
 
-						if (moreTrades) {
-							index++;
+						do {
+							moreTrades = trades && (index + 1) < trades.length;
 
-							if (this.resumeMarkerService.isInRange(trades[index])) {
-								// assume we have these already
-								moreTrades = false
-							}
-							else {
-								if (trades[index].time > targetTimeInMillis) {
-									this.collectionService.getTrades().save(trades[index])
-									this.resumeMarkerService.ping(trades[index])
+							if (moreTrades) {
+								index++;
+
+								if (this.resumeMarkerService.isInRange(trades[index])) {
+									// assume we have these already
+									moreTrades = false
 								}
 								else {
-									moreTrades = false;
-									moreToProcess = false;
+									if (trades[index].time > targetTimeInMillis) {
+										this.collectionService.getTrades().save(trades[index])
+										this.resumeMarkerService.ping(trades[index])
+									}
+									else {
+										moreTrades = false;
+										moreToProcess = false;
+									}
 								}
 							}
-						}
-					} while (moreTrades)
+						} while (moreTrades)
 
-					processing = false;
-				})
-			}
-		}
+						// processing = false;
+						prm = undefined;
+					}, function (err) {
+						console.log("Something bad happened. ")
+						console.log(err)
+					})
+				}
+		//	}
+		// }
 	}
 }

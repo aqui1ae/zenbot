@@ -34,16 +34,10 @@ module.exports = function (cb) {
     }
     zenbot.set('zenbot:db.mongo', db)
 
-    // debugger
-    // var coll = db.collection('trades').insert(JSON.parse('{ "_id" : "gdax.BTC-USD-29882150", "trade_id" : 29882150, "time"  : 1513969378300, "size" : 0.08, "price" : 13700.45, "side" : "sell", "id" : "gdax.BTC-USD-29882150", "selector" : "gdax.BTC-USD" }'))
-    
-    // setTimeout(function() {
-    //   // Fetch the document
-    //   db.collection('trades').findOne({ }, function(err, item) {
-    //     if (err) console.log(err)
-    //     else console.log(item);
-    //   })
-    // }, 100);
+      db.collection('trades').find({ }).toArray(function(err, item) {
+        if (err) console.log(err)
+        else console.log(item);
+      })
 
     if (c.mongo.username) {
       db.authenticate(c.mongo.username, c.mongo.password, function (err, result) {
