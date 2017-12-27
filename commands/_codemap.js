@@ -5,6 +5,7 @@ module.exports = {
   'list-selectors': require('./list-selectors'),
   'list-strategies': require('./list-strategies'),
   'backfill': require('./backfill'),
+  'backfillFunction': require('./backfill.function'),
   'sim': require('./sim'),
   'train': require('./train'),
   'balance': require('./balance'),
