@@ -1,5 +1,5 @@
 var service = require('../../../../lib/services/consume-and-process-service')
-var newResumeMarkerServiceFactory = require('../../../../test/_mocks/newResumeMarkerService.mock.factory')()
+var resumeMarkerServiceFactory = require('../../../../test/_mocks/resumeMarkerService.mock.factory')()
 
 describe('consume-and-process-service', function () {
 	beforeEach(function() {
@@ -13,7 +13,7 @@ describe('consume-and-process-service', function () {
 	describe('', function() {
 
 		beforeEach(function () {
-			var mockResumeMarkerService = newResumeMarkerServiceFactory.get();
+			var mockResumeMarkerService = resumeMarkerServiceFactory.get();
 
 			spyOn(foo, 'get').and.returnValues(
 				mockResumeMarkerService,
