@@ -34,11 +34,6 @@ module.exports = function (cb) {
     }
     zenbot.set('zenbot:db.mongo', db)
 
-      db.collection('trades').find({ }).toArray(function(err, item) {
-        if (err) console.log(err)
-        else console.log(item);
-      })
-
     if (c.mongo.username) {
       db.authenticate(c.mongo.username, c.mongo.password, function (err, result) {
         if (err) {
