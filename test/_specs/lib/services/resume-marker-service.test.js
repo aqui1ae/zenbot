@@ -15,6 +15,8 @@ describe('Resume Marker Service', function() {
 
 		beforeEach(function() {
 			spyOn(foo, 'get').and.returnValues(
+				{},
+				() => { return {normalized: 'tests.BTC-USD'}},
 				mockCollectionService
 				)
 		})
@@ -214,6 +216,8 @@ describe('Resume Marker Service', function() {
 
 		beforeEach(function() {
 			spyOn(foo, 'get').and.returnValues(
+				{},
+				() => { return {normalized: 'tests.BTC-USD'}},
 				mockCollectionService
 				)
 		})
