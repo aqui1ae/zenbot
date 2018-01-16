@@ -13,7 +13,8 @@
     "zenbot": "./zenbot.sh"
   },
   "scripts": {
-    "test": "jasmine test/**/**.test.js",
+    "test": "jasmine test/_specs/**/**.test.js",
+    "test-one": "jasmine $PATH_TO_TEST", 
     "postinstall": "rm -rf node_modules/forex.analytics/.git"
   },
   "dependencies": {
@@ -64,6 +65,7 @@
     "simple-xmpp": "^1.3.0",
     "sosa_mongo": "^1.0.3",
     "stats-lite": "2.1.0",
+    "superagent": "^3.8.2",
     "talib": "^1.0.3",
     "timebucket": "^0.4.0",
     "trend": "0.3.0",
