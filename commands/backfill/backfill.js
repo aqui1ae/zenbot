@@ -32,7 +32,6 @@ module.exports = function container (get, set, clear) {
 	      		console.log("\n\nBackfilling...\n\n");
 
 	      		var targetTime = tb(new Date().getTime()).resize('3m').subtract(so.days).toMilliseconds()
-	      		console.log(targetTime)
 
       			get('commands.backfill.backfillFunction')(targetTime).then(
       				(finalTradeId) => { 
