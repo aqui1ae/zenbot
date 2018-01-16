@@ -56,15 +56,6 @@ describe('Resume Marker Service', function() {
 			expect(rtn.oldest_time).toBe(990000);
 		})
 
-		xit('returns correct extremity when you ping it with a trade for the first time', function() {
-			var instance = service(foo.get, foo.set, foo.clear)
-
-			var rtn = instance.ping({trade_id:1300, time:990000})
-
-			expect(rtn.trade_id).toBe(1300)
-			expect(rtn.time).toBe(990000)
-		})
-
 		it('returns true when we create a range on XXX, then ask is XXX + 1 within one of any range', function() {
 			var instance = service(foo.get, foo.set, foo.clear)
 			var trade = {trade_id:1300, time:990000};
@@ -246,17 +237,6 @@ describe('Resume Marker Service', function() {
 			expect(rtn).toBeDefined();
 			expect(rtn.from).toBe(1300);
 			expect(rtn.oldest_time).toBe(990000);
-		})
-
-		// xtra x
-		xit('returns correct extremity when you ping it with a trade for the first time', function() {
-			var instance = service(foo.get, foo.set, foo.clear)
-			instance.setDirection('forward') // TODO: put this in a constants object
-
-			var rtn = instance.ping({trade_id:1300, time:990000})
-
-			expect(rtn.trade_id).toBe(1300)
-			expect(rtn.time).toBe(990000)
 		})
 
 		it('returns true when we create a range on XXX, then ask is XXX + 1 within one of any range', function() {
