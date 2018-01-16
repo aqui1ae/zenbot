@@ -102,7 +102,7 @@ describe('Resume Marker Service', function() {
 			expect(instance.getRanges()[0].from).toBe(1299)
 		})
 
-		xit('merges two now-adjacent ranges', function() {
+		it('merges two now-adjacent ranges', function() {
 			var instance = service(foo.get, foo.set, foo.clear)
 			var trade = {trade_id:1300, time:990000};
 
