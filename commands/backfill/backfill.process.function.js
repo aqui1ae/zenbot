@@ -35,35 +35,13 @@ module.exports = (function (get, set, clear) {
 						let idx = {i: index}
 						collectionService.getTrades().insert(curr).then((err, doc) => {
 							if (idx.i === trades.length) {
-								// console.log(idx.i + " " + trades.length)
 								cb(null, false, lastTrade.trade_id) 
 							}
 						})
 					}
 					else {
-					// if number we can skip to !== currtrade
-						// cb(null, false, (cb) => { 
-						// 		collectionService.getTrades().find({id: skipToTradeId}).toArray(function (err, data) {
-						// 			cb(data[0]) ;
-						// 	})
-						// })
-
-						// console.log(curr.trade_id + " caused a skip to " + JSON.stringify(skipToTradeId))
-
 						moreInThisBatch = false;
 						cb(null, false, skipToTradeId);
-
-						// if (moreInThisBatch) {
-						// 	moreInThisBatch = false
-						// 	// 	call db, and get the trade we can skip to, set currTrade to it
-						// 	setImmediate((tradeId) => {
-						// 		var tradeId = exchangeService.getSelector().normalized + "-" + skipToTradeId;
-						// 		collectionService.getTrades().find({id: tradeId}).toArray(function (err, data) {
-						// 			console.log("---=-=-=-= " + JSON.stringify(data[0]))
-						// 			cb(null, false, data[0])
-						// 		})
-						// 	})
-						// }
 					}
 				} else {
 					// this is past our time limit...
@@ -76,7 +54,6 @@ module.exports = (function (get, set, clear) {
 		} while (moreInThisBatch);
 
 		if (stopProcessingConditionReached) {
-			// console.log("2222222")
 			cb(null, stopProcessingConditionReached, rtnTrade.trade_id)
 		}
 	}
