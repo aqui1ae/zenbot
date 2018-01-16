@@ -6,7 +6,6 @@ module.exports = function container (get, set, clear) {
   var c = get('conf') || {}
 
   var collectionService = get('lib.collection-service')(get, set, clear)
-  var markerService = get('lib.marker-service')(get, set, clear)
 
   return function (program) {
     program

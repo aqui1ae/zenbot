@@ -16,6 +16,7 @@ module.exports = function container (get, set, clear) {
       .option('--conf <path>', 'path to optional conf overrides file')
       .option('--strategy <name>', 'strategy to use', String, c.strategy)
       .option('--order_type <type>', 'order type to use (maker/taker)', /^(maker|taker)$/i, c.order_type)
+      .option('--end <timestamp>', 'end at timestamp')
       .option('--filename <filename>', 'filename for the result output (ex: result.html). "none" to disable', String, c.filename)
       .option('--start <datetime>', 'start ("YYYYMMDDhhmm")')
       .option('--end <datetime>', 'end ("YYYYMMDDhhmm")')
@@ -79,7 +80,7 @@ module.exports = function container (get, set, clear) {
         var engine = get('lib.engine')(s)
         if (!so.min_periods) so.min_periods = 1
         var cursor, reversing, reverse_point
-        var query_start = so.start ? tb(so.start).resize(so.periodLength).subtract(so.min_periods + 2).toMilliseconds() : null
+        var query_start = so.start ? tb(so.start).resize(so.period_length).subtract(so.min_periods + 2).toMilliseconds() : null
 
         function exitSim () {
           console.log()
