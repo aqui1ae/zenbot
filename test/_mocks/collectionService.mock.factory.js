@@ -40,12 +40,18 @@ module.exports = function () {
 		var rtn = { 
 			getTrades: () => { 
 				return {find: () => { 
-					return { toArray: (func) => { 
-						func(null, tradesArray) 
-					}}}, insert: (trade) => { 
-						return { then: (cb, err) => { // TODO: should this be (err, cb) instead?
+					return { limit: (num) => {
+						return { toArray: (func) => {
+							func(null, tradesArray)
+						}}
+					},
+							toArray: (func) => { 
+								func(null, tradesArray) 
+							}
+					}}, insert: (trade) => { 
+					return { then: (cb, err) => { // TODO: should this be (err, cb) instead?
 								cb(trade)
-							}}},
+					}}},
 			}},
 			getResumeMarkers: () => { 
 				return {find: () => { 

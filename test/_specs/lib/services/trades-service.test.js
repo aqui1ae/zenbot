@@ -28,36 +28,32 @@ describe('Trades Service', function() {
 		})
 
 		it('returns a valid opts object with default params', function() {
+			var regex = new RegExp("/^stub.BTC-USD/")
+
 			var instance = service(foo.get, foo.set, foo.clear)
 
-			var rtn = instance.getInitialOptsObject()
+			var rtn = instance.getInitialQueryAttributes()
 
 			expect(rtn).toBeDefined();
-			expect(rtn).toEqual({})
+			expect(rtn).toEqual({id: regex})
+			expect(rtn.trade_id).not.toBeDefined()
 			expect(rtn.from).not.toBeDefined()
 			expect(rtn.to).not.toBeDefined()			
 		})
 
-		it('returns a valid opts object when startingTradeId is given but optsFunc is not', function() {
+		it('returns a valid opts object when startingTradeId is given', function() {
+			var regex = new RegExp("/^stub.BTC-USD/")
+
 			var instance = service(foo.get, foo.set, foo.clear)
 
-			var rtn = instance.getInitialOptsObject(100)
+			var rtn = instance.getInitialQueryAttributes(100)
 
 			expect(rtn).toBeDefined();
-			expect(rtn.from).toBe(100)
+			expect(rtn).toEqual({id: regex, trade_id: { $lt: 100}})
+			expect(rtn.from).not.toBeDefined()
 			expect(rtn.to).not.toBeDefined()
 		})
 
-		it('returns a valid opts object when startingTradeId is given and optsFunc is passed in', function() {
-			var instance = service(foo.get, foo.set, foo.clear)
-
-			var rtn = instance.getInitialOptsObject(100, (opts, selector) => { opts.foo = "foo"; return opts; })
-
-			expect(rtn).toBeDefined();
-			expect(rtn.from).toBe(100)
-			expect(rtn.to).not.toBeDefined()
-			expect(rtn.foo).toBe("foo")
-		})
 	})
 
 	describe('when exchange is forward, ', function() {
@@ -78,35 +74,30 @@ describe('Trades Service', function() {
 		})
 
 		it('returns a valid opts object with default params', function() {
+			var regex = new RegExp("/^stub.BTC-USD/")
+
 			var instance = service(foo.get, foo.set, foo.clear)
 
-			var rtn = instance.getInitialOptsObject()
+			var rtn = instance.getInitialQueryAttributes()
 
 			expect(rtn).toBeDefined();
-			expect(rtn).toEqual({})
+			expect(rtn).toEqual({id: regex})
+			expect(rtn.trade_id).not.toBeDefined()
 			expect(rtn.from).not.toBeDefined()
 			expect(rtn.to).not.toBeDefined()			
 		})
 
-		it('returns a valid opts object when startingTradeId is given but optsFunc is not', function() {
+		it('returns a valid opts object when startingTradeId is given', function() {
+			var regex = new RegExp("/^stub.BTC-USD/")
+
 			var instance = service(foo.get, foo.set, foo.clear)
 
-			var rtn = instance.getInitialOptsObject(100)
+			var rtn = instance.getInitialQueryAttributes(100)
 
 			expect(rtn).toBeDefined();
+			expect(rtn).toEqual({id: regex, trade_id: { $lt: 100}})
 			expect(rtn.from).not.toBeDefined()
-			expect(rtn.to).toBe(100)
-		})
-
-		it('returns a valid opts object when startingTradeId is given and optsFunc is passed in', function() {
-			var instance = service(foo.get, foo.set, foo.clear)
-
-			var rtn = instance.getInitialOptsObject(100, (opts, selector) => { opts.foo = "foo"; return opts; })
-
-			expect(rtn).toBeDefined();
-			expect(rtn.from).not.toBeDefined()
-			expect(rtn.to).toBe(100)
-			expect(rtn.foo).toBe("foo")
+			expect(rtn.to).not.toBeDefined()
 		})
 	})
 
@@ -124,7 +115,7 @@ describe('Trades Service', function() {
 
 		it('calls getTrades correctly', function(done) {
 			var instance = service(foo.get, foo.set, foo.clear)
-			var nomalizedSelector = mockExchangeService().getSelector().normalized;
+			var normalizedSelector = mockExchangeService().getSelector().normalized;
 
 			instance.getTrades().then((data) => {
 				expect(data.length === 2).toBe(true)
@@ -149,7 +140,7 @@ describe('Trades Service', function() {
 
 		it('calls getTrades correctly', function(done) {
 			var instance = service(foo.get, foo.set, foo.clear)
-			var nomalizedSelector = mockExchangeService().getSelector().normalized;
+			var normalizedSelector = mockExchangeService().getSelector().normalized;
 
 			instance.getTrades().then((data) => {
 				expect(data.length === 2).toBe(true)
