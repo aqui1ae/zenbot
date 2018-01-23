@@ -19,6 +19,30 @@ describe('Exchange Service', function() {
 			spyOn(foo, 'get').and.returnValues(
 				{selector: normalizedSelector}, // conf
 				
+				() => { return selectorObject } // selector object
+				);
+		})
+
+		it('returns undefined the expected exchange when no parameter is passed in', function() {
+
+			var instance = service(foo.get, foo.set, foo.clear)
+
+			var rtn = instance.getExchange()
+
+			expect(rtn).not.toBeDefined();
+		})
+
+	})
+
+	describe('', function() {
+		normalizedSelector = 'stub.BTC-USD'
+		exchangeId = 'stub'
+		selectorObject = {normalized: normalizedSelector, exchange_id: exchangeId };
+
+		beforeEach(function() {
+			spyOn(foo, 'get').and.returnValues(
+				{selector: normalizedSelector}, // conf
+				
 				() => { return selectorObject }, // selector object
 				
 				{
