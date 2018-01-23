@@ -33,8 +33,8 @@ module.exports = function container (get, set, clear) {
     theExchange.getTrades = function (opts, cb) {
     	var url = "http://localhost:7802/"
 
-    	if (opts.from !== undefined) {
-    		url += "?mostRecentTradeId=" + opts.from
+    	if (opts.to !== undefined) {
+    		url += "?mostRecentTradeId=" + opts.to
     	}
 
     	superagent.get(url).end(function (err, response) {
