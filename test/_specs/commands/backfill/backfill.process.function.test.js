@@ -40,7 +40,7 @@ describe('The Backfill Process function', function() {
 
 			expect(queue.dequeue.calls.count()).toEqual(1)
 			expect(callback.calls.count()).toEqual(1) 
-			expect(callback).toHaveBeenCalledWith(null, false, 3000)
+			expect(callback).toHaveBeenCalledWith(null, false, 3000, {trade_id: 3000, time: 99992})
 		})
 	})
 
@@ -66,7 +66,7 @@ describe('The Backfill Process function', function() {
 
 			expect(queue.dequeue.calls.count()).toEqual(1)
 			expect(callback.calls.count()).toEqual(1)
-			expect(callback).toHaveBeenCalledWith(null, true, 3001)
+			expect(callback).toHaveBeenCalledWith(null, true, 3001, {trade_id: 3001, time: 99994})
 		})
 	})
 
