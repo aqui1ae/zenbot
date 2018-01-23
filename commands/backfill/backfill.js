@@ -23,27 +23,35 @@ module.exports = function container (get, set, clear) {
 
 	        	c.selector = get('lib.objectify-selector')(selector || c.selector)
 
-	        	var exchangeName = get('lib.exchange-service')(get, set, clear).getExchange().name; // TODO: Refactor all exchanges to be in the format of the stub.exchange, so we can use getName() here.
-	      		var msg = "Hitting up the exchange '" + exchangeName + "' for trades within the past " + so.days + " day"; if (so.days > 1) {msg += "s."} else {msg += "."}
+	        	var exchangeService = get('lib.exchange-service')(get, set, clear);
+	        	var exchange = exchangeService.getExchange()
+	        	if (exchange !== undefined) {
 
-	      		console.log("*************************")
-	      		console.log(msg)
-	      		console.log("*************************")
-	      		console.log("\n\nBackfilling...\n\n");
+		        	var exchangeName = exchange.name; // TODO: Refactor all exchanges to be in the format of the stub.exchange, so we can use getName() here.
+		      		var msg = "Hitting up the exchange '" + exchangeName + "' for trades within the past " + so.days + " day"; if (so.days > 1) {msg += "s."} else {msg += "."}
 
-				var targetTime = tb(new Date().getTime()).resize('1d').subtract(so.days).toMilliseconds()
+		      		console.log("*************************")
+		      		console.log(msg)
+		      		console.log("*************************")
+		      		console.log("\n\nBackfilling...\n\n");
 
-      			get('commands.backfill.backfillFunction')(targetTime).then(
-      				(finalTradeId) => { 
-      					process.stdout.write("\n\n");
-      					// TODO: Make this say: "Done. Last processed trade happened on January 37, 2018 10:02 
-      					console.log("final trade id ==> [" + JSON.stringify(finalTradeId) + "]")
-      					process.exit(); 
-      				},
-      				(err) => { 
-      					console.log("error. " + err)
-      				}
-      			);
+					var targetTime = tb(new Date().getTime()).resize('1d').subtract(so.days).toMilliseconds()
+
+	      			get('commands.backfill.backfillFunction')(targetTime).then(
+	      				(finalTradeId) => { 
+	      					process.stdout.write("\n\n");
+	      					// TODO: Make this say: "Done. Last processed trade happened on January 37, 2018 10:02 
+	      					console.log("final trade id ==> [" + JSON.stringify(finalTradeId) + "]")
+	      					process.exit(0);
+	      				},
+	      				(err) => { 
+	      					console.log("error. " + err)
+	      				}
+	      			);
+      			} else {
+      				console.log("\nSorry, couldn't find an exchange named [" + c.selector.normalized + "].")
+      				process.exit(1); 
+      			}
 			})
 	}
 }
