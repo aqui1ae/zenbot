@@ -16,7 +16,10 @@ module.exports = (function (get, set, clear) {
 	return (mostRecentlyProcessedTradeId, queue, cb) => {
 		tradesService.getTrades(mostRecentlyProcessedTradeId).then(function (returnedTrades) {
 			if (returnedTrades.length > 0) {
-				queue.enqueue(returnedTrades);
+				queue.enqueue(returnedTrades.sort((a, b) => {
+						return b.trade_id - a.trade_id;
+					})
+				);
 				cb(null, 'cp_process', returnedTrades[returnedTrades.length - 1].trade_id)
 			}
 			else {
