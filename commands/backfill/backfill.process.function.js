@@ -35,13 +35,13 @@ module.exports = (function (get, set, clear) {
 						let idx = {i: index}
 						collectionService.getTrades().insert(curr).then((err, doc) => {
 							if (idx.i === trades.length) {
-								cb(null, false, lastTrade.trade_id) 
+								cb(null, false, lastTrade.trade_id, lastTrade) 
 							}
 						})
 					}
 					else {
 						moreInThisBatch = false;
-						cb(null, false, skipToTradeId);
+						cb(null, false, skipToTradeId, curr);
 					}
 				} else {
 					// this is past our time limit...
@@ -54,7 +54,7 @@ module.exports = (function (get, set, clear) {
 		} while (moreInThisBatch);
 
 		if (stopProcessingConditionReached) {
-			cb(null, stopProcessingConditionReached, rtnTrade.trade_id)
+			cb(null, stopProcessingConditionReached, rtnTrade.trade_id, rtnTrade)
 		}
 	}
 

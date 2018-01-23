@@ -14,9 +14,7 @@ module.exports = (function (get, set, clear) {
 	tradesService = get('lib.trades-service')(get, set, clear)
 
 	return (mostRecentlyProcessedTradeId, queue, cb) => {
-		var opts = tradesService.getInitialQueryAttributes(mostRecentlyProcessedTradeId)
-		
-		tradesService.getTrades(opts).then(function (returnedTrades) {
+		tradesService.getTrades(mostRecentlyProcessedTradeId).then(function (returnedTrades) {
 			if (returnedTrades.length > 0) {
 				queue.enqueue(returnedTrades);
 				cb(null, 'cp_process', returnedTrades[returnedTrades.length - 1].trade_id)

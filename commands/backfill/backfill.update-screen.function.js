@@ -4,8 +4,8 @@ module.exports = (function (get, set, clear) {
 
   	var exchangeService = get('lib.exchange-service')(get, set, clear)
 
-	return (trade, queue, cb) => { 
-		var now = new Date().getTime();
+	return (trade_id, data) => { 
+		// var now = new Date().getTime();
 		// var exhange = exchangeService.getExchange()
 
 		// var number;
@@ -16,9 +16,12 @@ module.exports = (function (get, set, clear) {
 		// else
 		// 	number = foo;
 
-		process.stdout.clearLine();
-		process.stdout.write("Processed trades up to " + Moment(trade.time).fromNow() + "." );
-		process.stdout.cursorTo(0);
+		if (data !== undefined) {
+			process.stdout.clearLine();
+			process.stdout.write("Processed trades up to " + Moment(data.time).fromNow() + "." );
+			process.stdout.cursorTo(0);
+		}
+
 		// process.stdout.write("\n");
 	}
 
