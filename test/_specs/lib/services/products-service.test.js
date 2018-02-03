@@ -20,7 +20,7 @@ describe('Products Service', function() {
 		expect(service).not.toBe(undefined);
 	})
 
-	it('returns a list of the current exchanges products', function() {
+	it('returns the expected list of the current exchanges products', function() {
 		var instance = service(foo.get, foo.set, foo.clear);
 
 		var rtn = instance.getProducts();
@@ -38,5 +38,18 @@ describe('Products Service', function() {
 		expect(rtn[1].max_size).toBe("350")
 		expect(rtn[1].increment).toBe("0.01")
 		expect(rtn[1].label).toBe("BCH/USD")
+	})
+
+	it('returns the selected product, as defined by the selectorObject', function() {
+		var instance = service(foo.get, foo.set, foo.clear);
+
+		var rtn = instance.getSelectedProduct();
+
+		expect(rtn.asset).toBe("BCH")
+		expect(rtn.currency).toBe("USD")
+		expect(rtn.min_size).toBe("0.01")
+		expect(rtn.max_size).toBe("350")
+		expect(rtn.increment).toBe("0.01")
+		expect(rtn.label).toBe("BCH/USD")
 	})
 })
