@@ -53,6 +53,7 @@ module.exports = function () {
 				historyScan: direction,
 				getTrades: getTradesFunc,
 				getProducts: getProductsFunc
+				historyScanUsesTime: opts.historyScanUsesTime,
 			}
 		}
 
