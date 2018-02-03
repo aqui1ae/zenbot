@@ -4,6 +4,10 @@ var exchangeServiceFactory = require('../../../../test/_mocks/exchangeService.mo
 describe('Products Service', function() {
 	var mockExchangeService = exchangeServiceFactory.get();
 
+	normalizedSelector = 'stub.BTC-USD'
+	exchangeId = 'stub'
+	selectorObject = {normalized: normalizedSelector, exchange_id: exchangeId, asset: 'BTC', currency: 'USD' };
+
 	beforeEach(function() {
 		foo = {
 			get: function() { },
@@ -12,6 +16,7 @@ describe('Products Service', function() {
 		}
 
 		spyOn(foo, 'get').and.returnValues(
+			() => selectorObject, // conf			
 			mockExchangeService
 		)
 	})
@@ -26,18 +31,18 @@ describe('Products Service', function() {
 		var rtn = instance.getProducts();
 
 		expect(rtn.length).toBe(2);
-		expect(rtn[0].asset).toBe("BCH")
-		expect(rtn[0].currency).toBe("BTC")
+		expect(rtn[0].asset).toBe("BTC")
+		expect(rtn[0].currency).toBe("USD")
 		expect(rtn[0].min_size).toBe("0.01")
 		expect(rtn[0].max_size).toBe("200")
 		expect(rtn[0].increment).toBe("0.00001")
-		expect(rtn[0].label).toBe("BCH/BTC")
-		expect(rtn[1].asset).toBe("BCH")
-		expect(rtn[1].currency).toBe("USD")
+		expect(rtn[0].label).toBe("BTC/USD")
+		expect(rtn[1].asset).toBe("BTC")
+		expect(rtn[1].currency).toBe("EUR")
 		expect(rtn[1].min_size).toBe("0.01")
 		expect(rtn[1].max_size).toBe("350")
 		expect(rtn[1].increment).toBe("0.01")
-		expect(rtn[1].label).toBe("BCH/USD")
+		expect(rtn[1].label).toBe("BTC/EUR")
 	})
 
 	it('returns the selected product, as defined by the selectorObject', function() {
@@ -45,11 +50,11 @@ describe('Products Service', function() {
 
 		var rtn = instance.getSelectedProduct();
 
-		expect(rtn.asset).toBe("BCH")
+		expect(rtn.asset).toBe("BTC")
 		expect(rtn.currency).toBe("USD")
 		expect(rtn.min_size).toBe("0.01")
-		expect(rtn.max_size).toBe("350")
-		expect(rtn.increment).toBe("0.01")
-		expect(rtn.label).toBe("BCH/USD")
+		expect(rtn.max_size).toBe("200")
+		expect(rtn.increment).toBe("0.00001")
+		expect(rtn.label).toBe("BTC/USD")
 	})
 })

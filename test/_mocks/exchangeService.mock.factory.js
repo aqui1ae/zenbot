@@ -30,20 +30,20 @@ module.exports = function () {
 			getProductsFunc = opts.getProductsFunc;
 		else
 			getProductsFunc = () => { return [{
-    			"asset": "BCH",
-    			"currency": "BTC",
+    			"asset": "BTC",
+    			"currency": "USD",
     			"min_size": "0.01",
     			"max_size": "200",
     			"increment": "0.00001",
-    			"label": "BCH/BTC"
+    			"label": "BTC/USD"
   			},
   			{
-    			"asset": "BCH",
-    			"currency": "USD",
+    			"asset": "BTC",
+    			"currency": "EUR",
     			"min_size": "0.01",
     			"max_size": "350",
     			"increment": "0.01",
-    			"label": "BCH/USD"
+    			"label": "BTC/EUR"
   			}] };
 
 		var direction = opts.direction || 'backward';
@@ -52,8 +52,8 @@ module.exports = function () {
 			return {
 				historyScan: direction,
 				getTrades: getTradesFunc,
-				getProducts: getProductsFunc
-				historyScanUsesTime: opts.historyScanUsesTime,
+				getProducts: getProductsFunc,
+				historyScanUsesTime: opts.historyScanUsesTime
 			}
 		}
 
