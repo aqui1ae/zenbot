@@ -16,6 +16,7 @@ describe('Products Service', function() {
 		}
 
 		spyOn(foo, 'get').and.returnValues(
+			{},
 			() => selectorObject, // conf			
 			mockExchangeService
 		)
