@@ -25,12 +25,34 @@ module.exports = function () {
 		else
 			getTradesFunc = (opts, func) => { func(null, [{trade_id: 3000}, {trade_id: 3001}]) };
 
+		var getProductsFunc;
+		if (opts.getProductsFunc !== undefined && opts.getProductsFunc !== null)
+			getProductsFunc = opts.getProductsFunc;
+		else
+			getProductsFunc = () => { return [{
+    			"asset": "BCH",
+    			"currency": "BTC",
+    			"min_size": "0.01",
+    			"max_size": "200",
+    			"increment": "0.00001",
+    			"label": "BCH/BTC"
+  			},
+  			{
+    			"asset": "BCH",
+    			"currency": "USD",
+    			"min_size": "0.01",
+    			"max_size": "350",
+    			"increment": "0.01",
+    			"label": "BCH/USD"
+  			}] };
+
 		var direction = opts.direction || 'backward';
 
 		rtn.getExchange = () => {
 			return {
 				historyScan: direction,
-				getTrades: getTradesFunc 
+				getTrades: getTradesFunc,
+				getProducts: getProductsFunc
 			}
 		}
 
