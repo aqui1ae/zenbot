@@ -1,61 +1,51 @@
+var mock = require('mock-require')
 var service = require('../../../../lib/services/products-service')
-var exchangeServiceFactory = require('../../../../test/_mocks/exchangeService.mock.factory')()
+var exchangeServiceFactory = require('../../../../test/_mocks/exchangeService.mock.factory')
 
 describe('Products Service', function() {
-	var mockExchangeService = exchangeServiceFactory.get();
+  var normalizedSelector = 'stub.BTC-USD'
+  var exchangeId = 'stub'
+  var conf = {selector: {normalized: normalizedSelector, exchange_id: exchangeId, asset: 'BTC', currency: 'USD' }}
 
-	normalizedSelector = 'stub.BTC-USD'
-	exchangeId = 'stub'
-	selectorObject = {normalized: normalizedSelector, exchange_id: exchangeId, asset: 'BTC', currency: 'USD' };
+  beforeEach(function() {
+    mock('../../../../lib/services/collection-service', exchangeServiceFactory)
+    service = mock.reRequire('../../../../lib/services/products-service')
+  })
 
-	beforeEach(function() {
-		foo = {
-			get: function() { },
-			set: function() { },
-			clear: function() { }
-		}
+  it('is available', function() {
+    expect(service).not.toBe(undefined)
+  })
 
-		spyOn(foo, 'get').and.returnValues(
-			{},
-			() => selectorObject, // conf			
-			mockExchangeService
-		)
-	})
+  it('returns the expected list of the current exchanges products', function() {
+    var instance = service(conf)
 
-	it('is available', function() {
-		expect(service).not.toBe(undefined);
-	})
+    var rtn = instance.getProducts()
 
-	it('returns the expected list of the current exchanges products', function() {
-		var instance = service(foo.get, foo.set, foo.clear);
+    expect(rtn.length).toBe(2)
+    expect(rtn[0].asset).toBe('BTC')
+    expect(rtn[0].currency).toBe('USD')
+    expect(rtn[0].min_size).toBe('0.01')
+    expect(rtn[0].max_size).toBe('200.0')
+    expect(rtn[0].increment).toBe('0.00001')
+    expect(rtn[0].label).toBe('BTC/USD')
+    expect(rtn[1].asset).toBe('BTC')
+    expect(rtn[1].currency).toBe('EUR')
+    expect(rtn[1].min_size).toBe('0.01')
+    expect(rtn[1].max_size).toBe('350.0')
+    expect(rtn[1].increment).toBe('0.01')
+    expect(rtn[1].label).toBe('BTC/EUR')
+  })
 
-		var rtn = instance.getProducts();
+  it('returns the selected product, as defined by the selectorObject', function() {
+    var instance = service(conf)
 
-		expect(rtn.length).toBe(2);
-		expect(rtn[0].asset).toBe("BTC")
-		expect(rtn[0].currency).toBe("USD")
-		expect(rtn[0].min_size).toBe("0.01")
-		expect(rtn[0].max_size).toBe("200")
-		expect(rtn[0].increment).toBe("0.00001")
-		expect(rtn[0].label).toBe("BTC/USD")
-		expect(rtn[1].asset).toBe("BTC")
-		expect(rtn[1].currency).toBe("EUR")
-		expect(rtn[1].min_size).toBe("0.01")
-		expect(rtn[1].max_size).toBe("350")
-		expect(rtn[1].increment).toBe("0.01")
-		expect(rtn[1].label).toBe("BTC/EUR")
-	})
+    var rtn = instance.getSelectedProduct()
 
-	it('returns the selected product, as defined by the selectorObject', function() {
-		var instance = service(foo.get, foo.set, foo.clear);
-
-		var rtn = instance.getSelectedProduct();
-
-		expect(rtn.asset).toBe("BTC")
-		expect(rtn.currency).toBe("USD")
-		expect(rtn.min_size).toBe("0.01")
-		expect(rtn.max_size).toBe("200")
-		expect(rtn.increment).toBe("0.00001")
-		expect(rtn.label).toBe("BTC/USD")
-	})
+    expect(rtn.asset).toBe('BTC')
+    expect(rtn.currency).toBe('USD')
+    expect(rtn.min_size).toBe('0.01')
+    expect(rtn.max_size).toBe('200.0')
+    expect(rtn.increment).toBe('0.00001')
+    expect(rtn.label).toBe('BTC/USD')
+  })
 })

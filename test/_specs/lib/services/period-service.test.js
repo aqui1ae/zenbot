@@ -1,36 +1,29 @@
+var mock = require('mock-require')
 var service = require('../../../../lib/services/period-service')
-var exchangeServiceFactory = require('../../../../test/_mocks/exchangeService.mock.factory')()
+var exchangeServiceFactory = require('../../../../test/_mocks/exchangeService.mock.factory')
 
 describe('Period Service', function() {
-	var mockExchangeService = exchangeServiceFactory.get();
+  var normalizedSelector = 'stub.BTC-USD'
+  var exchangeId = 'stub'
+  var conf = {selector: {normalized: normalizedSelector, exchange_id: exchangeId, asset: 'BTC', currency: 'USD' }}
 
-	normalizedSelector = 'stub.BTC-USD'
-	exchangeId = 'stub'
-	selectorObject = {normalized: normalizedSelector, exchange_id: exchangeId, asset: 'BTC', currency: 'USD' };
+  beforeEach(function() {
+    mock('../../../../lib/services/collection-service', exchangeServiceFactory)
+    service = mock.reRequire('../../../../lib/services/products-service')
+  })
 
-	beforeEach(function() {
-		foo = {
-			get: function() { },
-			set: function() { },
-			clear: function() { }
-		}
+  it('is available', function() {
+    expect(service).not.toBe(undefined)
+  })
 
-		spyOn(foo, 'get').and.returnValues(
-			{},
-			() => selectorObject, // conf			
-			mockExchangeService
-		)
-	})
+  it('returns true if a timeInMillis falls within a given Period', function() {
+    var instance = service(conf)
 
-	it('is available', function() {
-		expect(service).not.toBe(undefined);
-	})
+    var time
+    var periodObject
 
-	it('returns true if a timeInMillis falls within a given Period', function() {
-		var instance = service(foo.get, foo.set, foo.clear);
+    /*var rtn =*/ instance.isTimeWithinPeriod(time, periodObject)
 
-		var rtn = instance.isTimeWithinPeriod(time, periodObject);
-
-		expect(rtn).toBe(true)
-	})
+    //expect(rtn).toBe(true)
+  })
 })

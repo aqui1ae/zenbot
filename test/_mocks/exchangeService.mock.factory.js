@@ -37,13 +37,39 @@ module.exports = (opts) => {
       func(null, tradesArray) 
     }
 
+  var getProductsFunc
+  if (opts.getProductsFunc !== undefined && opts.getProductsFunc !== null)
+    getProductsFunc = opts.getProductsFunc
+  else
+    getProductsFunc = () => {
+      return [
+        {
+          'asset': 'BTC',
+          'currency': 'USD',
+          'min_size': '0.01',
+          'max_size': '200.0',
+          'increment': '0.00001',
+          'label': 'BTC/USD'
+        },
+        {
+          'asset': 'BTC',
+          'currency': 'EUR',
+          'min_size': '0.01',
+          'max_size': '350.0',
+          'increment': '0.01',
+          'label': 'BTC/EUR'
+        },
+      ]
+    }
+
   var direction = opts.direction || 'backward'
 
   rtn.getExchange = () => {
     return {
       historyScan: direction,
       historyScanUsesTime: opts.historyScanUsesTime,
-      getTrades: getTradesFunc 
+      getTrades: getTradesFunc,
+      getProducts: getProductsFunc
     }
   }
 
