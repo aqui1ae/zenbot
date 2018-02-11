@@ -5,11 +5,13 @@ var tb = require('timebucket')
   , path = require('path')
   , moment = require('moment')
   , colors = require('colors')
-  , objectifySelector = require('../lib/objectify-selector')
   , engineFactory = require('../lib/engine')
   , collectionService = require('../lib/services/collection-service')
 
-module.exports = function (program, conf) {
+module.exports = function (program, _conf) {
+
+  var conf = _conf
+
   program
     .command('sim [selector]')
     .allowUnknownOption()
@@ -42,6 +44,7 @@ module.exports = function (program, conf) {
     .option('--backtester_generation <generation>','creates a json file in simulations with the generation number', Number, -1)
     .option('--verbose', 'print status lines on every period')
     .action(function (selector, cmd) {
+
       var s = {options: minimist(process.argv)}
       var so = s.options
       delete so._
@@ -74,7 +77,7 @@ module.exports = function (program, conf) {
       so.stats = !!cmd.enable_stats
       so.show_options = !cmd.disable_options
       so.verbose = !!cmd.verbose
-      so.selector = objectifySelector(selector || conf.selector)
+      
       so.mode = 'sim'
 
       if (cmd.conf) {
@@ -83,15 +86,29 @@ module.exports = function (program, conf) {
           so[k] = overrides[k]
         })
       }
-      var engine = engineFactory(s, conf)
+
+      if (selector !== undefined && selector !== null)
+        conf.selector = selector
+
+      var selectorService = require('../lib/services/selector-service')(conf)
+      conf.selector = selectorService.getSelector()
+
+      var productsService = require('../lib/services/products-service')(conf)
+      var periodService = require('../lib/services/period-service')(conf)
+
+      var services = {productsService: productsService, periodService: periodService, selectorService: selectorService}
+
+      var engine = engineFactory(s, conf, services)
       if (!so.min_periods) so.min_periods = 1
       var cursor, reversing, reverse_point
-      var query_start = so.start ? tb(so.start).resize(so.period_length).subtract(so.min_periods + 2).toMilliseconds() : null
+      
+      
+      var query_start = so.start ? tb(so.start).resize(periodService.getPeriodLength()).subtract(so.min_periods + 2).toMilliseconds() : null
 
       function exitSim () {
         console.log()
         if (!s.period) {
-          console.error('no trades found! try running `zenbot backfill ' + so.selector.normalized + '` first')
+          console.error('no trades found! try running `zenbot backfill ' + selectorService.getSelector().normalized + '` first')
           process.exit(1)
         }
         var option_keys = Object.keys(so)
@@ -170,7 +187,7 @@ module.exports = function (program, conf) {
 
         if (so.backtester_generation >= 0)
         {
-          fs.writeFileSync(path.resolve(__dirname, '..', 'simulations','sim_'+so.strategy.replace('_','')+'_'+ so.selector.normalized.replace('_','').toLowerCase()+'_'+so.backtester_generation+'.json'),options_json, {encoding: 'utf8'})
+          fs.writeFileSync(path.resolve(__dirname, '..', 'simulations','sim_'+so.strategy.replace('_','')+'_'+ selectorService.getSelector().normalized.replace('_','').toLowerCase()+'_'+so.backtester_generation+'.json'),options_json, {encoding: 'utf8'})
         }
 
         if (so.filename !== 'none') {
@@ -192,8 +209,8 @@ module.exports = function (program, conf) {
             .replace('{{code}}', code)
             .replace('{{trend_ema_period}}', so.trend_ema || 36)
             .replace('{{output}}', html_output)
-            .replace(/\{\{symbol\}\}/g,  so.selector.normalized + ' - zenbot ' + require('../package.json').version)
-          var out_target = so.filename || 'simulations/sim_result_' + so.selector.normalized +'_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/-/g, '').replace(/:/g, '').replace(/20/, '') + '_UTC.html'
+            .replace(/\{\{symbol\}\}/g,  selectorService.getSelector().normalized + ' - zenbot ' + require('../package.json').version)
+          var out_target = so.filename || 'simulations/sim_result_' + selectorService.getSelector().normalized +'_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/-/g, '').replace(/:/g, '').replace(/20/, '') + '_UTC.html'
           fs.writeFileSync(out_target, out)
           console.log('wrote', out_target)
         }
@@ -204,7 +221,7 @@ module.exports = function (program, conf) {
       function getNext () {
         var opts = {
           query: {
-            selector: so.selector.normalized
+            selector: selectorService.getSelector().normalized
           },
           sort: {time: 1},
           limit: 1000
