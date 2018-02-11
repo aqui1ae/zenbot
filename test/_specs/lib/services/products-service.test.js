@@ -48,4 +48,11 @@ describe('Products Service', function() {
     expect(rtn.increment).toBe('0.00001')
     expect(rtn.label).toBe('BTC/USD')
   })
+
+  it('returns the correctly formatted ID for the selected product', function () {
+    var instance = service(conf)
+    var rtn = instance.getSelectedProductId()
+    expect(rtn).toBe('BTC-USD')
+  })
+  
 })
